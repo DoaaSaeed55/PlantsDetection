@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlantsDetection", "PlantsDetection\PlantsDetection.csproj", "{4EA0D4B0-B083-4A6F-9765-4DDA165183CB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlantsDetection", "PlantsDetection.csproj", "{4EA0D4B0-B083-4A6F-9765-4DDA165183CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
