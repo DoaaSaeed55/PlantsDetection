@@ -1,20 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "E:\\PL\\PlantsDetection\\PlantsDetection.csproj": {}
+    "C:\\Users\\MOFA\\source\\repos\\DoaaSaeed55\\PlantsDetection\\PlantsDetection.csproj": {}
   },
   "projects": {
-    "E:\\PL\\PlantsDetection\\PlantsDetection.csproj": {
+    "C:\\Users\\MOFA\\source\\repos\\DoaaSaeed55\\PlantsDetection\\PlantsDetection.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\PL\\PlantsDetection\\PlantsDetection.csproj",
+        "projectUniqueName": "C:\\Users\\MOFA\\source\\repos\\DoaaSaeed55\\PlantsDetection\\PlantsDetection.csproj",
         "projectName": "PlantsDetection",
-        "projectPath": "E:\\PL\\PlantsDetection\\PlantsDetection.csproj",
-        "packagesPath": "C:\\Users\\Sky\\.nuget\\packages\\",
-        "outputPath": "E:\\PL\\PlantsDetection\\obj\\",
+        "projectPath": "C:\\Users\\MOFA\\source\\repos\\DoaaSaeed55\\PlantsDetection\\PlantsDetection.csproj",
+        "packagesPath": "C:\\Users\\MOFA\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\MOFA\\source\\repos\\DoaaSaeed55\\PlantsDetection\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\Sky\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\MOFA\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -22,6 +26,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -34,6 +39,11 @@
           "warnAsError": [
             "NU1605"
           ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
         }
       },
       "frameworks": {
@@ -53,6 +63,14 @@
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.5.0, )"
+            },
+            "System.Drawing.Common": {
+              "target": "Package",
+              "version": "[8.0.3, )"
+            },
+            "TensorFlowSharp": {
+              "target": "Package",
+              "version": "[1.15.1, )"
             }
           },
           "imports": [
@@ -74,7 +92,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.202\\RuntimeIdentifierGraph.json"
         }
       }
     }
