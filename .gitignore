@@ -1,0 +1,7 @@
+
+/.vs
+/obj
+/obj
+*.cache
+/obj/Debug
+/obj/Debug/net6.0
