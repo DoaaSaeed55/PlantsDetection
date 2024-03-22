@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "E:\\C#\\PlantsDetection\\PlantsDetection\\PlantsDetection.csproj": {}
+    "E:\\PL\\PlantsDetection\\PlantsDetection.csproj": {}
   },
   "projects": {
-    "E:\\C#\\PlantsDetection\\PlantsDetection\\PlantsDetection.csproj": {
+    "E:\\PL\\PlantsDetection\\PlantsDetection.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\C#\\PlantsDetection\\PlantsDetection\\PlantsDetection.csproj",
+        "projectUniqueName": "E:\\PL\\PlantsDetection\\PlantsDetection.csproj",
         "projectName": "PlantsDetection",
-        "projectPath": "E:\\C#\\PlantsDetection\\PlantsDetection\\PlantsDetection.csproj",
+        "projectPath": "E:\\PL\\PlantsDetection\\PlantsDetection.csproj",
         "packagesPath": "C:\\Users\\Sky\\.nuget\\packages\\",
-        "outputPath": "E:\\C#\\PlantsDetection\\PlantsDetection\\obj\\",
+        "outputPath": "E:\\PL\\PlantsDetection\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Sky\\AppData\\Roaming\\NuGet\\NuGet.Config",

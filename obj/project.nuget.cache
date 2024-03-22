@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "bdkCEU4LGOGCc1WQpspMLtOT5mC1gKUl0TEf2kRo6hP8m+waRYNAaLDtJuFUzi+OIEMklBh/jM++EY+CEeTjJg==",
+  "dgSpecHash": "JbyMuXktoU5vWmWyNe+DmralO10WDI4JKorlZckrSQQRaK9cLjoQNVydWBHW4ZSYoL0WTaPzLdGA6MV7M+4Z+Q==",
   "success": true,
-  "projectFilePath": "E:\\C#\\PlantsDetection\\PlantsDetection\\PlantsDetection.csproj",
+  "projectFilePath": "E:\\PL\\PlantsDetection\\PlantsDetection.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Sky\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
     "C:\\Users\\Sky\\.nuget\\packages\\microsoft.csharp\\4.5.0\\microsoft.csharp.4.5.0.nupkg.sha512",
