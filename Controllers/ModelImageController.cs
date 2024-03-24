@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlantsDetection.ViewModels;
-using System;
-using TensorFlow;
-using System.Drawing;
 using System.IO;
+using System;
+using Tensorflow;
+using static Tensorflow.Binding;
+using System.Drawing;
+using TensorFlow;
 namespace PlantsDetection.Controllers
 {
     [Route("api/[controller]")]
@@ -17,70 +19,188 @@ namespace PlantsDetection.Controllers
                 _webHostEnvironment = webHostEnvironment;
         }
         [HttpPost]
-        public async Task<IActionResult> PostImageForModel(ImageModelViewModel model)
+        public async Task<IActionResult> PostImageForModel([FromForm]ImageModelViewModel imageModel)
         {
-            if (model == null || model.Image == null || model.Image?.Length == 0)
+            string filePath;
+            try
             {
-                return BadRequest(ModelState);
-            }
-            string folder = Path.Combine(_webHostEnvironment.WebRootPath, "ModelImages");
-            if (!Directory.Exists(folder))
-            {
-                Directory.CreateDirectory(folder);
-            }
-            string uniqueFileName = Guid.NewGuid().ToString() + "_" + model?.Image?.FileName;
-            string filePath = Path.Combine(folder, uniqueFileName);
+                if (imageModel == null || imageModel.Image == null || imageModel.Image?.Length == 0)
+                {
+                    return BadRequest(ModelState);
+                }
+                string folder = Path.Combine(_webHostEnvironment.ContentRootPath, "ModelImages");
+                if (!Directory.Exists(folder))
+                {
+                    Directory.CreateDirectory(folder);
+                }
+                string uniqueFileName = Guid.NewGuid().ToString() + "_" + imageModel?.Image?.FileName;
+                filePath = Path.Combine(folder, uniqueFileName);
 
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await model?.Image?.CopyToAsync(stream);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await imageModel?.Image?.CopyToAsync(stream);
+                }
             }
+            catch (Exception)
+            {
+
+                throw;
+            }
+          
 
             // todo : create model  for adding to DB
             try
             {
                 // Apply the AI model 
+                // Load the TensorFlow model
+                var model = TFModel.LoadModel(Path.Combine(_webHostEnvironment.ContentRootPath, "AIModels\\tomato-leaf-disease-98-accuracy.h5"));
+
+                // Load and preprocess the image
+                string imagePath = filePath;
+                var image = LoadImage(imagePath);
+                var preprocessedImage = PreprocessImage(image);
+
+                // Perform prediction
+                var prediction = model.Predict(preprocessedImage);
+
+                // Get the predicted class
+                var predictedClass = GetPredictedClass(prediction);
+
+                Console.WriteLine($"Predicted class: {predictedClass}");
+
+                //string modelPath = "path/to/your/model.h5";
+                //string imagePath = "path/to/your/image.jpg";
+                //int imageWidth = 256;
+                //int imageHeight = 256;
+
+                //// Load the model
+                //var model = keras.models.load_model(modelPath);
+
+                //// Load and preprocess the image
+                //var image = LoadImage(imagePath, imageWidth, imageHeight);
+
+                //// Perform inference
+                //var prediction = Predict(model, image);
+
+                //// Output prediction
+                //Console.WriteLine($"Prediction: {prediction}");
+
+                //// Cleanup
+                //keras.backend.clear_session();
 
 
 
-                var modelPath = Path.Combine(_webHostEnvironment.WebRootPath, "tomato-leaf-disease-98-accuracy.h5");  // Provide the path to your TensorFlow model
-                var graph = new TFGraph();
-                var aiModel = new TFSession(graph);
-                graph.Import(new TFBuffer(System.IO.File.ReadAllBytes(modelPath)));
-                byte[]? imageData = null;
-                var bitmap = new Bitmap(filePath);
-                
-                // Convert bitmap to byte array (assuming 3-channel RGB image)
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    bitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
-                    imageData = ms.ToArray();
-                }
 
-                var imageInputNodeName = "image_input"; // Replace with the actual name of your image input node
-                var auxInputNodeName = "aux_input"; // Replace with the actual name of your auxiliary input node
-
-                // Perform inference or other operations with the model
-                // Example:
-                var tensor = aiModel.GetRunner()
-                    .AddInput(graph[imageInputNodeName][0], imageData) // Assuming imageData is a byte array representing the image
-                  //.AddInput(graph[auxInputNodeName][0], auxInput) // Assuming auxInput is your auxiliary input data
-                  .Run(); // Adjust input node names accordingly
-                var result = ((float[,])tensor).GetValue();
-                Console.WriteLine(result);
-
-                // Close the session when done
-                aiModel.Dispose();
-                return Ok(result);
+                return Ok();
             }
             catch (Exception)
             {
                 return StatusCode(StatusCodes.Status405MethodNotAllowed,"failed to run the AI model");
             }
 
-          
+            //static float[] LoadImage(string imagePath, int width, int height)
+            //{
+            //    // Load image
+            //    var imageBytes = System.IO.File.ReadAllBytes(imagePath);
+            //    var tensor = Image.DecodeJpeg(imageBytes, channels: 3);
+            //    var resizedTensor = Image.ResizeBilinear(tensor, new Tensor(width), new Tensor(height));
 
-           
+            //    // Convert tensor to float array
+            //    var image = resizedTensor.numpy();
+            //    var imageData = (float[])image;
+
+            //    return imageData;
+            //}
+
+            //static int Predict(TensorFlow.keras.models.Model model, float[] image)
+            //{
+            //    // Reshape image to match model input shape
+            //    var input = np.array(image).reshape(1, 256, 256, 3);
+
+            //    // Perform prediction
+            //    var prediction = model.Predict(input);
+
+            //    // Extract predicted class (assuming it's a classification task)
+            //    var predictedClass = np.argmax(prediction, axis: 1).GetData<int>()[0];
+
+            //    return predictedClass;
+            //}
+
+            static Bitmap LoadImage(string path)
+            {
+                return new Bitmap(path);
+            }
+
+            static float[] PreprocessImage(Bitmap image)
+            {
+                // Resize the image to match the input size of the model
+                var resizedImage = new Bitmap(image, new Size(256, 256));
+
+                // Convert the image to float array and normalize pixel values
+                var inputValues = new float[256, 256, 3];
+                for (int y = 0; y < resizedImage.Height; y++)
+                {
+                    for (int x = 0; x < resizedImage.Width; x++)
+                    {
+                        var pixel = resizedImage.GetPixel(x, y);
+                        inputValues[x, y, 0] = pixel.R / 255.0f;
+                        inputValues[x, y, 1] = pixel.G / 255.0f;
+                        inputValues[x, y, 2] = pixel.B / 255.0f;
+                    }
+                }
+
+                // Flatten the array
+                return inputValues.Cast<float>().ToArray();
+            }
+
+            static int GetPredictedClass(float[] prediction)
+            {
+                // Get the index of the class with the highest probability
+                return Array.IndexOf(prediction, prediction.Max());
+            }
         }
+
+        public class TFModel
+        {
+            private TFGraph graph;
+            private TFSession session;
+
+            private TFModel(TFGraph graph, TFSession session)
+            {
+                this.graph = graph;
+                this.session = session;
+            }
+
+            public static TFModel LoadModel(string modelPath)
+            {
+                try
+                {
+                    var graph = new TFGraph();
+                    var session = new TFSession(graph);
+                    byte[] model = System.IO.File.ReadAllBytes(modelPath);
+                    graph.Import(model);
+                    return new TFModel(graph, session);
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+               
+            }
+
+            public float[] Predict(float[] input)
+            {
+                var tensor = TFTensor.FromBuffer(new TFShape(1, 256, 256, 3), input, 0, input.Length);
+                var runner = session.GetRunner();
+                runner.AddInput(graph["input_1"][0], tensor);
+                runner.Fetch(graph["dense_2/Softmax"][0]);
+                var output = runner.Run();
+                return ((float[][])output[0].GetValue(jagged: true))[0];
+            }
+
+        }
+
+
     }
 }
