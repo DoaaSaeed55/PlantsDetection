@@ -38,18 +38,27 @@ namespace PlantsDetection.Services
                 FirstName = model.FirstName,
                 LastName = model.LastName
             };
-
-            var result = await _userManager.CreateAsync(user, model.Password);
-
-            if (!result.Succeeded)
+            try
             {
-                var errors = string.Empty;
 
-                foreach (var error in result.Errors)
-                    errors += $"{error.Description},";
+                var result = await _userManager.CreateAsync(user, model.Password);
 
-                return new AuthModel { Message = errors };
+                if (!result.Succeeded)
+                {
+                    var errors = string.Empty;
+
+                    foreach (var error in result.Errors)
+                        errors += $"{error.Description},";
+
+                    return new AuthModel { Message = errors };
+                }
             }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
 
             await _userManager.AddToRoleAsync(user, "User");
 

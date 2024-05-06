@@ -17,17 +17,26 @@ namespace PlantsDetection.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> RegisterAsync([FromBody] RegisterModel model)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
 
-            var result = await _authService.RegisterAsync(model);
+                var result = await _authService.RegisterAsync(model);
 
-            if (!result.IsAuthenticated)
-                return BadRequest(result.Message);
+                if (!result.IsAuthenticated)
+                    return BadRequest(result.Message);
 
-            SetRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
+                SetRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
 
-            return Ok(result);
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
+         
         }
 
         [HttpPost("token")]
