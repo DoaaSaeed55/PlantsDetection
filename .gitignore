@@ -10,3 +10,5 @@ obj/Debug/net6.0/PlantsDetection.GeneratedMSBuildEditorConfig.editorconfig
 /obj
 /obj
 /ModelImages
+/bin
+/obj
