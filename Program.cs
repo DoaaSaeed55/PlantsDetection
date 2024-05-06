@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using PlantsDetection.Identity;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +24,13 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<PlantsDetectionContext>(options => {
 
     options.UseSqlServer(builder.Configuration.GetConnectionString(name: "DefaultConnection"));
+
+});
+
+
+builder.Services.AddDbContext<AppIdentityDbContext>(options => {
+
+    options.UseSqlServer(builder.Configuration.GetConnectionString(name: "IdentityConnection"));
 
 });
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<PlantsDetectionContext>();
