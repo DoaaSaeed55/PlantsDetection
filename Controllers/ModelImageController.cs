@@ -14,14 +14,17 @@ namespace PlantsDetection.Controllers
     public class ModelImageController : ControllerBase
     {
         private readonly IWebHostEnvironment _webHostEnvironment;
-        public ModelImageController(IWebHostEnvironment webHostEnvironment)
+        private readonly PlantsDetectionContext _context;
+        public ModelImageController(IWebHostEnvironment webHostEnvironment, PlantsDetectionContext context)
         {
-                _webHostEnvironment = webHostEnvironment;
+            _webHostEnvironment = webHostEnvironment;
+            _context = context;
         }
         [HttpPost]
         public async Task<IActionResult> PostImageForModel([FromForm]ImageModelViewModel imageModel)
         {
             string filePath;
+            string imagePath;
             try
             {
                 if (imageModel == null || imageModel.Image == null || imageModel.Image?.Length == 0)
@@ -34,9 +37,9 @@ namespace PlantsDetection.Controllers
                     Directory.CreateDirectory(folder);
                 }
                 string uniqueFileName = Guid.NewGuid().ToString() + "_" + imageModel?.Image?.FileName;
-                filePath = Path.Combine(folder, uniqueFileName);
+                 imagePath = Path.Combine(folder, uniqueFileName);
 
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                using (var stream = new FileStream(imagePath, FileMode.Create))
                 {
                     await imageModel?.Image?.CopyToAsync(stream);
                 }
@@ -46,58 +49,124 @@ namespace PlantsDetection.Controllers
 
                 throw;
             }
-          
+
 
             // todo : create model  for adding to DB
+            //var Modelimage = new ModelImage
+            //{
+            //   ModelType= imagePath,
+            //   CreatedAt= DateTime.Now,
+            //   UpdatedAt= DateTime.Now,
+               
+            //};
+            //// Add ImageData to database
+            //_context.ModelImages.Add(Modelimage);
+            //await _context.SaveChangesAsync();
+
+
+            //try
+            //{
+            //    // Apply the AI model 
+            //    // Load the TensorFlow model
+            //    var model = TFModel.LoadModel(Path.Combine(_webHostEnvironment.ContentRootPath, "AIModels\\tomato-leaf-disease-98-accuracy.h5"));
+
+            //    // Load and preprocess the image
+            //    string imagePath = filePath;
+            //    var image = LoadImage(imagePath);
+            //    var preprocessedImage = PreprocessImage(image);
+
+            //    // Perform prediction
+            //    var prediction = model.Predict(preprocessedImage);
+
+            //    // Get the predicted class
+            //    var predictedClass = GetPredictedClass(prediction);
+
+            //    Console.WriteLine($"Predicted class: {predictedClass}");
+
+            //    //string modelPath = "path/to/your/model.h5";
+            //    //string imagePath = "path/to/your/image.jpg";
+            //    //int imageWidth = 256;
+            //    //int imageHeight = 256;
+
+            //    //// Load the model
+            //    //var model = keras.models.load_model(modelPath);
+
+            //    //// Load and preprocess the image
+            //    //var image = LoadImage(imagePath, imageWidth, imageHeight);
+
+            //    //// Perform inference
+            //    //var prediction = Predict(model, image);
+
+            //    //// Output prediction
+            //    //Console.WriteLine($"Prediction: {prediction}");
+
+            //    //// Cleanup
+            //    //keras.backend.clear_session();
+
+
+
+
+            //    return Ok();
+            //}
+            //catch (Exception)
+            //{
+            //    return StatusCode(StatusCodes.Status405MethodNotAllowed,"failed to run the AI model");
+            //}
+
             try
             {
-                // Apply the AI model 
-                // Load the TensorFlow model
-                var model = TFModel.LoadModel(Path.Combine(_webHostEnvironment.ContentRootPath, "AIModels\\tomato-leaf-disease-98-accuracy.h5"));
+                // Path to the image file you want to send
+                
+                // Create an HttpClient instance
+                using (var client = new HttpClient())
+                {
+                    // Create a new MultipartFormDataContent instance to hold the form data
+                    using (var formData = new MultipartFormDataContent())
+                    {
+                        // Read the image file as bytes
+                        byte[] imageBytes = System.IO.File.ReadAllBytes(imagePath);
 
-                // Load and preprocess the image
-                string imagePath = filePath;
-                var image = LoadImage(imagePath);
-                var preprocessedImage = PreprocessImage(image);
+                        // Create a ByteArrayContent from the image bytes
+                        var imageContent = new ByteArrayContent(imageBytes);
 
-                // Perform prediction
-                var prediction = model.Predict(preprocessedImage);
+                        // Add the image content to the form data with the key 'image'
+                        formData.Add(imageContent, "image", "image.jpg");
 
-                // Get the predicted class
-                var predictedClass = GetPredictedClass(prediction);
+                        try
+                        {
+                            // Send the POST request to the Flask endpoint
+                            var response = await client.PostAsync("http://127.0.0.1:5000/api/process_image", formData);
 
-                Console.WriteLine($"Predicted class: {predictedClass}");
+                            // Check if the request was successful
+                            if (response.IsSuccessStatusCode)
+                            {
+                                // Read the response content as a string
+                                string responseContent = await response.Content.ReadAsStringAsync();
 
-                //string modelPath = "path/to/your/model.h5";
-                //string imagePath = "path/to/your/image.jpg";
-                //int imageWidth = 256;
-                //int imageHeight = 256;
+                                // Output the response
+                                Console.WriteLine(responseContent);
 
-                //// Load the model
-                //var model = keras.models.load_model(modelPath);
+                                return Ok(responseContent.ToString());
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Error: {response.StatusCode} - {response.ReasonPhrase}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Exception: {ex.Message}");
+                        }
+                    }
+                }
 
-                //// Load and preprocess the image
-                //var image = LoadImage(imagePath, imageWidth, imageHeight);
-
-                //// Perform inference
-                //var prediction = Predict(model, image);
-
-                //// Output prediction
-                //Console.WriteLine($"Prediction: {prediction}");
-
-                //// Cleanup
-                //keras.backend.clear_session();
-
-
-
-
-                return Ok();
             }
-            catch (Exception)
+            catch(Exception)
             {
-                return StatusCode(StatusCodes.Status405MethodNotAllowed,"failed to run the AI model");
-            }
+                  return StatusCode(StatusCodes.Status405MethodNotAllowed,"failed to run the AI model");
 
+            }
+            return StatusCode(StatusCodes.Status405MethodNotAllowed, "failed to run the AI model");
             //static float[] LoadImage(string imagePath, int width, int height)
             //{
             //    // Load image

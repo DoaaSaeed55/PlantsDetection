@@ -11,7 +11,8 @@ namespace PlantsDetection.Models
         }
 
         public int ModelId { get; set; }
-        public string? ModelType { get; set; }
+        public string? ImagePath{ get; set; }
+
         public DateTime? UpdatedAt { get; set; }
         public DateTime? CreatedAt { get; set; }
         public int? UserId { get; set; }

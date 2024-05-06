@@ -94,7 +94,7 @@ namespace PlantsDetection.Models
                     .HasColumnType("datetime")
                     .HasDefaultValueSql("(getdate())");
 
-                entity.Property(e => e.ModelType).HasMaxLength(50);
+                entity.Property(e => e.ImagePath).HasMaxLength(50);
 
                 entity.Property(e => e.UpdatedAt)
                     .HasColumnType("datetime")
