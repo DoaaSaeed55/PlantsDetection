@@ -13,6 +13,8 @@ namespace PlantsDetection.Controllers
     [ApiController]
     public class ModelImageController : ControllerBase
     {
+
+
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly PlantsDetectionContext _context;
         public ModelImageController(IWebHostEnvironment webHostEnvironment, PlantsDetectionContext context)
@@ -21,7 +23,7 @@ namespace PlantsDetection.Controllers
             _context = context;
         }
         [HttpPost]
-        public async Task<IActionResult> PostImageForModel([FromForm]ImageModelViewModel imageModel)
+        public async Task<IActionResult> PostImageForModel([FromForm] ImageModelViewModel imageModel)
         {
             string filePath;
             string imagePath;
@@ -37,7 +39,7 @@ namespace PlantsDetection.Controllers
                     Directory.CreateDirectory(folder);
                 }
                 string uniqueFileName = Guid.NewGuid().ToString() + "_" + imageModel?.Image?.FileName;
-                 imagePath = Path.Combine(folder, uniqueFileName);
+                imagePath = Path.Combine(folder, uniqueFileName);
 
                 using (var stream = new FileStream(imagePath, FileMode.Create))
                 {
@@ -52,16 +54,16 @@ namespace PlantsDetection.Controllers
 
 
             // todo : create model  for adding to DB
-            //var Modelimage = new ModelImage
-            //{
-            //   ModelType= imagePath,
-            //   CreatedAt= DateTime.Now,
-            //   UpdatedAt= DateTime.Now,
-               
-            //};
-            //// Add ImageData to database
-            //_context.ModelImages.Add(Modelimage);
-            //await _context.SaveChangesAsync();
+            // Save image path and creation date to the database
+            var modelImage = new ModelImage
+            {
+                ImagePath = imagePath,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            };
+
+            _context.ModelImages.Add(modelImage);
+            await _context.SaveChangesAsync();
 
 
             //try
@@ -116,7 +118,7 @@ namespace PlantsDetection.Controllers
             try
             {
                 // Path to the image file you want to send
-                
+
                 // Create an HttpClient instance
                 using (var client = new HttpClient())
                 {
@@ -144,8 +146,16 @@ namespace PlantsDetection.Controllers
                                 string responseContent = await response.Content.ReadAsStringAsync();
 
                                 // Output the response
-                                Console.WriteLine(responseContent);
+                                Console.WriteLine(responseContent.ToString());
+                                var detectDisese = new DetectDisease
+                                {
+                                    Content = responseContent,
+                                    CreatedAt = DateTime.Now,
+                                    UpdatedAt = DateTime.Now
+                                };
 
+                                _context.DetectDiseases.Add(detectDisese);
+                                await _context.SaveChangesAsync();
                                 return Ok(responseContent.ToString());
                             }
                             else
@@ -161,9 +171,9 @@ namespace PlantsDetection.Controllers
                 }
 
             }
-            catch(Exception)
+            catch (Exception)
             {
-                  return StatusCode(StatusCodes.Status405MethodNotAllowed,"failed to run the AI model");
+                return StatusCode(StatusCodes.Status405MethodNotAllowed, "failed to run the AI model");
 
             }
             return StatusCode(StatusCodes.Status405MethodNotAllowed, "failed to run the AI model");
@@ -229,6 +239,101 @@ namespace PlantsDetection.Controllers
             }
         }
 
+
+        //History
+
+        [HttpGet("Models/get")]
+        public IActionResult GetImageHistory()
+        {
+            try
+            {
+                // Retrieve all processed images from the database
+                var imageHistory = _context.ModelImages
+                    .Select(image => new
+                    {
+                        OriginalImagePath = image.ImagePath,
+                        ProcessingDateTime = image.CreatedAt
+                    })
+                    .ToList();
+
+                return Ok(imageHistory);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine($"An error occurred while retrieving image history: {ex.Message}");
+                return StatusCode(500, "An error occurred while retrieving image history.");
+            }
+        }
+
+
+        //images Models/get/:id
+
+        [HttpGet("Models/get/{id}")]
+        public IActionResult GetImageDetails(int id)
+        {
+            try
+            {
+                // Retrieve the image details by ID from the database
+                var imageDetails = _context.ModelImages.Find(id);
+
+                if (imageDetails == null)
+                {
+                    return NotFound("Image not found.");
+                }
+
+                // Create an anonymous object containing image details
+                var imageData = new
+                {
+
+                    OriginalImagePath = imageDetails.ImagePath,
+                    ProcessingDateTime = imageDetails.CreatedAt
+                };
+
+                return Ok(imageData);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine($"An error occurred while retrieving image details: {ex.Message}");
+                return StatusCode(500, "An error occurred while retrieving image details.");
+            }
+        }
+
+        //Delete
+
+        [HttpDelete("Models/delete/{id}")]
+        public IActionResult DeleteImage(int id)
+        {
+            try
+            {
+                // Find the image by ID
+                var image = _context.ModelImages.Find(id);
+
+                if (image == null)
+                {
+                    return NotFound("Image not found.");
+                }
+
+                // Remove the image from the context
+                _context.ModelImages.Remove(image);
+
+                // Save changes to the database
+                _context.SaveChanges();
+
+                return Ok("Image deleted successfully.");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine($"An error occurred while deleting the image: {ex.Message}");
+                return StatusCode(500, "An error occurred while deleting the image.");
+            }
+        }
+
+
+
+
         public class TFModel
         {
             private TFGraph graph;
@@ -255,7 +360,7 @@ namespace PlantsDetection.Controllers
 
                     throw;
                 }
-               
+
             }
 
             public float[] Predict(float[] input)
@@ -273,3 +378,4 @@ namespace PlantsDetection.Controllers
 
     }
 }
+
